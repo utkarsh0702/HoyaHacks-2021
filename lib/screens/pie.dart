@@ -60,26 +60,18 @@ class _PieState extends State<Pie> {
       select2 = copy[1];
     }
 
-    List<int> doubleList = List<int>.generate(10, (int index) => index);
-    List<DropdownMenuItem> menuItemList = doubleList
-        .map((val) =>
-            DropdownMenuItem(value: val + 1, child: Text('${val + 1}')))
-        .toList();
-
-    dynamic getColumnData() {
-      if (isSwitched == true) {
-        List<ColorPlotData> columnData = [];
-        for (int i = 0; i < selected; i++) {
-          columnData.add(ColorPlotData(xData[i], yData[i], color[i]));
-        }
-        return columnData;
-      } else {
-        List<PlotData> columnData = [];
-        for (int i = 0; i < selected; i++) {
-          columnData.add(PlotData(xData[i], yData[i]));
-        }
-        return columnData;
+    //-------------------------- Pie chart Data -----------------//
+    dynamic getPieData() {
+      Map<String, double> data = counter(widget.data, stringX, stringY);
+      Map<String, int> counts = count(widget.data, stringX);
+      Set<String> unique = xData.toSet();
+      List<PlotData> columnData = [];
+      String temp ='';
+      for (int i = 0; i < data.length; i++) {
+        temp = unique.elementAt(i);
+        columnData.add(PlotData(temp, double.tryParse((data[temp]/counts[temp]).toStringAsFixed(2))));
       }
+      return columnData;
     }
 
     return Scaffold(
@@ -188,47 +180,6 @@ class _PieState extends State<Pie> {
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Wrap(
-                    children: [
-                      Text('No of Rows: ',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20.0,
-                            fontFamily: 'Bosk',
-                          )),
-                      DropdownButton(
-                        value: selected,
-                        onChanged: (val) => setState(() => selected = val),
-                        items: menuItemList,
-                      )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 20.0, left: 20.0, right: 20.0, bottom: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Varient Colors',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20.0,
-                            fontFamily: 'Bosk',
-                          )),
-                      Switch(
-                        value: isSwitched,
-                        onChanged: (value) {
-                          setState(() {
-                            isSwitched = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
                   padding: const EdgeInsets.only(
                       top: 30.0, bottom: 20.0, left: 30.0, right: 30.0),
                   child: MaterialButton(
@@ -265,41 +216,32 @@ class _PieState extends State<Pie> {
               ])
             : ListView(
                 children: [
-                  Container(
-                      height: MediaQuery.of(context).size.height - 100,
-                      child: SfCartesianChart(
-                        title: ChartTitle(text: '$stringX vs $stringY'),
-                        primaryXAxis:
-                            CategoryAxis(title: AxisTitle(text: stringX)),
-                        primaryYAxis:
-                            NumericAxis(title: AxisTitle(text: stringY)),
-                        legend: Legend(isVisible: true),
-                        series: (isSwitched == true) ? <ChartSeries>[
-                          ColumnSeries<ColorPlotData, String>(
-                              color: Colors.brown,
-                              dataSource: getColumnData(),
-                              name: stringY,
-                              xValueMapper: (ColorPlotData sales, _) => sales.x,
-                              yValueMapper: (ColorPlotData sales, _) => sales.y,
-                              pointColorMapper: (ColorPlotData sales, _) => sales.z,
-                              dataLabelSettings: DataLabelSettings(
-                                isVisible: true,
-                              ))
-                        ] :
-                        <ChartSeries>[
-                          ColumnSeries<PlotData, String>(
-                              dataSource: getColumnData(),
-                              name: stringY,
-                              xValueMapper: (PlotData sales, _) => sales.x,
-                              yValueMapper: (PlotData sales, _) => sales.y,
-                              dataLabelSettings: DataLabelSettings(
-                                isVisible: true,
-                              ))
-                        ],
-                      )),
                   Padding(
                     padding: const EdgeInsets.only(
-                        top: 30.0, bottom: 20.0, left: 30.0, right: 30.0),
+                        top: 20.0, left: 20.0, right: 20.0, bottom: 20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Doughnut Pie Chart',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20.0,
+                              fontFamily: 'Bosk',
+                            )),
+                        Switch(
+                          value: isSwitched,
+                          onChanged: (value) {
+                            setState(() {
+                              isSwitched = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 10.0, bottom: 20.0, left: 30.0, right: 30.0),
                     child: MaterialButton(
                         minWidth: MediaQuery.of(context).size.width - 50,
                         height: 50.0,
@@ -321,7 +263,41 @@ class _PieState extends State<Pie> {
                             plot = false;
                           });
                         }),
-                  )
+                  ),
+                  Container(
+                      height: MediaQuery.of(context).size.height - 100,
+                      child: SfCircularChart(
+                          title: ChartTitle(text: "$stringX Pie Chart"),
+                          legend: Legend(isVisible: true),
+                          series: (isSwitched == true)
+                              ? <DoughnutSeries>[
+                                  DoughnutSeries<PlotData, String>(
+                                      dataSource: getPieData(),
+                                      xValueMapper: (PlotData sales, _) =>
+                                          sales.x,
+                                      yValueMapper: (PlotData sales, _) =>
+                                          sales.y,
+                                      dataLabelSettings: DataLabelSettings(
+                                          isVisible: true,
+                                          labelPosition:
+                                              ChartDataLabelPosition.outside,
+                                          labelIntersectAction:
+                                              LabelIntersectAction.none))
+                                ]
+                              : <PieSeries>[
+                                  PieSeries<PlotData, String>(
+                                      dataSource: getPieData(),
+                                      xValueMapper: (PlotData sales, _) =>
+                                          sales.x,
+                                      yValueMapper: (PlotData sales, _) =>
+                                          sales.y,
+                                      dataLabelSettings: DataLabelSettings(
+                                          isVisible: true,
+                                          labelPosition:
+                                              ChartDataLabelPosition.outside,
+                                          labelIntersectAction:
+                                              LabelIntersectAction.none))
+                                ])),
                 ],
               ));
   }
@@ -332,12 +308,4 @@ class PlotData {
   double y;
 
   PlotData(this.x, this.y);
-}
-
-class ColorPlotData {
-  String x;
-  double y;
-  Color z;
-
-  ColorPlotData(this.x, this.y, this.z);
 }

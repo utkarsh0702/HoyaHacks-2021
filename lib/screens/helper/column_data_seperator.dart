@@ -61,3 +61,30 @@ int lookUp(String col){
   int x = table[col];
   return x;
 }
+
+Map<String, double> counter(List<List<String>> data, String x, String y){
+  List<String> k = colX(data, x);
+  Set<String> kSet = k.toSet();
+  List<double> v = colY(data, y);
+  Map<String, double> count = {};
+  for(int i=0; i<kSet.length; i++){
+    count[kSet.elementAt(i)] = 0.0;
+  }
+  for(int i=0; i<k.length; i++){
+  count[k[i]] += v[i];
+}
+return count;
+}
+
+Map<String, int> count(List<List<String>> data, String x){
+  List<String> k = colX(data, x);
+  Set<String> kSet = k.toSet();
+  Map<String, int> count = {};
+  for(int i=0; i<kSet.length; i++){
+    count[kSet.elementAt(i)] = 0;
+  }
+  for(int i=0; i<k.length; i++){
+  count[k[i]] += 1;
+}
+return count;
+}

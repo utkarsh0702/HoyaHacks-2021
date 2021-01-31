@@ -5,6 +5,7 @@ import 'excel.dart';
 import 'bar.dart';
 import 'line.dart';
 import 'spline.dart';
+import 'pie.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -80,6 +81,15 @@ class _HomePageState extends State<HomePage> {
             } else {
               Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => Spline(data: number)));
+            }
+          }
+          else if (address == 'pie') {
+            if (number == null) {
+              _showDialog(
+                  'Data Upload', 'Please upload the data before visualizing..');
+            } else {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => Pie(data: number)));
             }
           }
         },
